@@ -1,0 +1,27 @@
+resolver: lts-12.5
+
+packages:
+- .
+- location:
+    git: https://github.com/runeksvendsen/crypto-depth.git
+    commit: 927de14ea196d41876d88963208f6a3ea6cdd2e3
+  extra-dep: true
+- location:
+    git: https://github.com/runeksvendsen/crypto-venues.git
+    commit: 386d941ccee403cd92ae2674f90bdb610fd06c5a
+  extra-dep: true
+- location:
+    git: https://github.com/runeksvendsen/orderbook.git
+    commit: a8b3cad89036c1613618792943bc6261c02eb4fe
+  extra-dep: true
+
+extra-deps:
+- logging-3.0.5@sha256:88096d3124fce9a19af3720f751e1a354d866ed5030d2e5197238d2277cdb2f2
+- safe-money-0.6@sha256:8da43268c8b7818926efc9d92de2d511222d7dcf918583b308bea99cf04fa154
+- rate-limit-1.4.0@sha256:0a7e4ca7abe25b2daf0dcdf7f166bce4b9d3bb793dd4d21ba658af157541a8d3
+- serialise-0.2.0.0@sha256:377bc9a3f2be921496db65d6d1d9be6f8903c9d868a39dffd4831f5c61154964
+- time-units-1.0.0@sha256:27cf54091c4a0ca73d504fc11d5c31ab4041d17404fe3499945e2055697746c1
+- xmlbf-0.4.1@sha256:c0a7e38f611e4090e05debe22fee75e68aa97d59178b3098de3ca7751bf66709
+- cborg-0.2.0.0@sha256:4cc743e688046e0262c0d2ddcc786a4ebdd8b1e949c2055b4aef7eae5483eb90
+- half-0.2.2.3@sha256:52386a48e7fd42f4a1d49799073bb3d04477168c88b6541d5f66637d7c2e838c
+- beam-postgres-0.3.2.2@sha256:950cda1e10dfedbc8649e6551adbd31995c2f95f07bc63ed4d8135d03cdfbce2
