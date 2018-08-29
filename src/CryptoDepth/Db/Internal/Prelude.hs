@@ -12,6 +12,7 @@ module CryptoDepth.Db.Internal.Prelude
 , Vector
 , Proxy(..)
 , toS
+, printf
 )
 where
 
@@ -29,3 +30,4 @@ import Data.Time.Clock                  (UTCTime)
 import Data.Text                        (Text)
 import Data.Vector                      (Vector)
 import Data.Proxy                       (Proxy(..))
+import Text.Printf                      (printf)

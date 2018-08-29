@@ -35,6 +35,7 @@ dependencies:
 - text
 - vector
 - aeson
+- bytestring
 
 default-extensions:
 - DeriveGeneric

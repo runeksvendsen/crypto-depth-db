@@ -35,3 +35,6 @@ instance PathTable "GBP" be where
 
 instance PathTable "JPY" be where
     pathTable = _pathJPY
+
+type PathEntityType be numeraire =
+    DatabaseEntity be CryptoDepthDb (TableEntity (PathT numeraire))

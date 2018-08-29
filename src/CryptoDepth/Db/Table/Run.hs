@@ -1,5 +1,5 @@
 module CryptoDepth.Db.Table.Run
-( RunT(Run)
+( RunT(..)
 , Run, RunId
 , UTCTime
 )

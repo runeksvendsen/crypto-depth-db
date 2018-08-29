@@ -13,9 +13,6 @@ import qualified Database.Beam          as Beam
 import Database.Beam.Postgres           (Pg, Postgres)
 
 
-type DbEntityType numeraire =
-    Beam.DatabaseEntity Postgres Db.CryptoDepthDb (Beam.TableEntity (PathT numeraire))
-
 storePaths
     :: forall numeraire slippageEdgeWeight.
        (KnownSymbol numeraire, Db.PathTable numeraire Postgres)
@@ -23,7 +20,7 @@ storePaths
     -> CD.Map CD.Sym (CD.LiquidPaths numeraire slippageEdgeWeight)
     -> Pg ()
 storePaths runId paths = Beam.runInsert $
-    Beam.insert (Db.pathTable Db.cryptoDepthDb :: DbEntityType numeraire) $
+    Beam.insert (Db.pathTable Db.cryptoDepthDb :: Db.PathEntityType Postgres numeraire) $
         Beam.insertValues $ concatMap (toPaths . snd) (Map.toList paths)
   where
     toPaths :: CD.LiquidPaths numeraire slippageEdgeWeight
