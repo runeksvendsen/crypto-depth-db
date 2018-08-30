@@ -1,13 +1,13 @@
 {-# LANGUAGE UndecidableInstances #-}
-module CryptoDepth.Db.Table.Book
-( module CryptoDepth.Db.Table.Book
+module CryptoDepth.Db.Internal.Table.Book
+( module CryptoDepth.Db.Internal.Table.Book
 , RunT, Run, RunId
 )
 where
 
 import OrderBook.Types                  (SomeOrder)
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Table.Run         (RunT, Run, RunId)
+import CryptoDepth.Db.Internal.Table.Run         (RunT, Run, RunId)
 import CryptoDepth.Db.Orphans           ()
 import CryptoDepth                      (Sym, OneDiv)
 

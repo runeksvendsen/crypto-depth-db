@@ -6,8 +6,8 @@ where
 
 import CryptoDepth.Db.Internal.Prelude
 import CryptoDepth.Db
-import CryptoDepth.Db.Table.Run
-import CryptoDepth.Db.Table.Path
+import CryptoDepth.Db.Internal.Table.Run
+import CryptoDepth.Db.Internal.Table.Path
 
 import Database.Beam
 import Database.Beam.Postgres

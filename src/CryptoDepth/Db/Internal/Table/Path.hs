@@ -1,12 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-}
-module CryptoDepth.Db.Table.Path
-( module CryptoDepth.Db.Table.Path
+module CryptoDepth.Db.Internal.Table.Path
+( module CryptoDepth.Db.Internal.Table.Path
 , RunT, Run, RunId
 )
 where
 
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Table.Run         (RunT, Run, RunId)
+import CryptoDepth.Db.Internal.Table.Run         (RunT, Run, RunId)
 import CryptoDepth.Db.Orphans           ()
 import CryptoDepth                      (Sym, OneDiv)
 

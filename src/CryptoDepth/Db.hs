@@ -1,9 +1,9 @@
 module CryptoDepth.Db where
 
 import Database.Beam
-import CryptoDepth.Db.Table.Path    (PathT)
-import CryptoDepth.Db.Table.Run     (RunT)
-import CryptoDepth.Db.Table.Book    (BookT)
+import CryptoDepth.Db.Internal.Table.Path    (PathT)
+import CryptoDepth.Db.Internal.Table.Run     (RunT)
+import CryptoDepth.Db.Internal.Table.Book    (BookT)
 
 
 data CryptoDepthDb f = CryptoDepthDb

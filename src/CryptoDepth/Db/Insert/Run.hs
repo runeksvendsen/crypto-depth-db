@@ -6,7 +6,7 @@ module CryptoDepth.Db.Insert.Run
 where
 
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Table.Run
+import CryptoDepth.Db.Internal.Table.Run
 import qualified CryptoDepth.Db                     as Db
 
 import qualified Database.Beam                      as Beam

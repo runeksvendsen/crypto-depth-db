@@ -1,4 +1,4 @@
-module CryptoDepth.Db.Table.Run
+module CryptoDepth.Db.Internal.Table.Run
 ( RunT(..)
 , Run, RunId
 , UTCTime
