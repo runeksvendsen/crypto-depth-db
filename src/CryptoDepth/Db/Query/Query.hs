@@ -14,26 +14,14 @@ import Database.Beam.Postgres
 import Database.Beam.Postgres.Syntax        (PgExpressionSyntax)
 
 
-
 newestPathsQ
     :: (KnownSymbol numeraire, PathTable numeraire Postgres)
     => Q PgSelectSyntax CryptoDepthDb s (PathT numeraire (QExpr PgExpressionSyntax s))
 newestPathsQ = do
-    run <- newestRunQ
+    newestRun <- newestRunQ
     path <- allPathsQ
-    guard_ (_pathRunId path ==. pk run)
+    guard_ (_pathRunId path `references_` newestRun)
     return path
-
-
-pathList
-    :: (KnownSymbol numeraire, PathTable numeraire Postgres)
-    => Pg [Path numeraire]
-pathList = runSelectReturningList selectAllPaths
-
-selectAllPaths
-    :: (KnownSymbol numeraire, PathTable numeraire Postgres)
-    => SqlSelect PgSelectSyntax (QExprToIdentity (PathT numeraire (QExpr PgSelectSyntax s)))
-selectAllPaths = select allPathsQ
 
 allPathsQ
     :: forall numeraire s.
@@ -41,9 +29,6 @@ allPathsQ
     => Q PgSelectSyntax CryptoDepthDb s ((PathT numeraire) (QExpr PgExpressionSyntax s))
 allPathsQ = all_ (pathTable cryptoDepthDb :: PathEntityType Postgres numeraire)
 
-
-newestRun :: Pg (Maybe Run)
-newestRun = runSelectReturningOne $ select newestRunQ
 
 newestRunQ :: Q PgSelectSyntax CryptoDepthDb s (RunT (QGenExpr QValueContext PgExpressionSyntax s))
 newestRunQ =
