@@ -2,6 +2,7 @@
 module CryptoDepth.Db.Internal.Table.Path
 ( module CryptoDepth.Db.Internal.Table.Path
 , RunT, Run, RunId
+, Columnar'(Columnar')
 )
 where
 
@@ -15,13 +16,17 @@ import GHC.TypeLits                     (KnownSymbol, Symbol)
 import Data.Time.LocalTime              ()
 import qualified Money
 import Data.Tagged                      (Tagged)
+import Database.Beam.Schema.Tables      (Columnar'(Columnar'))
 
 
 data PathT (numeraire :: Symbol) f
     = Path
     { _pathRunId    :: PrimaryKey RunT f
+    -- | Starting symbol for the path
     , _pathSrc      :: Columnar f Sym
+    -- | Ending symbol for the path
     , _pathDst      :: Columnar f Sym
+    -- | Actual path
     , _pathPath     :: Columnar f (NonEmpty SymVenue)
     -- | 0.1% slippage
     , _pathQty_01   :: Columnar f (Tagged (OneDiv 1000) (Money.Dense numeraire))
@@ -49,3 +54,19 @@ instance KnownSymbol numeraire => Table (PathT numeraire) where
     primaryKey Path{..} = PathId _pathRunId _pathPath
 
 instance Beamable (PrimaryKey (PathT numeraire))
+
+class PathQuantity slippage numeraire f where
+    pathQuantity :: PathT numeraire f
+                 -> Columnar' f (Tagged slippage (Money.Dense numeraire))
+
+instance PathQuantity (OneDiv 1000) numeraire f where
+    pathQuantity = Columnar' . _pathQty_01
+
+instance PathQuantity (OneDiv 200) numeraire f where
+    pathQuantity = Columnar' . _pathQty_05
+
+instance PathQuantity (OneDiv 100) numeraire f where
+    pathQuantity = Columnar' . _pathQty_1
+
+instance PathQuantity (OneDiv 20) numeraire f where
+    pathQuantity = Columnar' . _pathQty_5
