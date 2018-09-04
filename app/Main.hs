@@ -24,6 +24,9 @@ import Text.Printf                                  (printf)
 import Control.Monad.IO.Class                       (liftIO)
 import Database.PostgreSQL.Simple.Transaction       (withTransaction)
 import System.Environment                           (lookupEnv)
+-- TEST
+import qualified CryptoDepth.Db.Query.Query         as Test
+import CryptoDepth.Db.Query
 
 
 maxRetries = 10
@@ -34,7 +37,21 @@ main :: IO ()
 main = do
     let errMsg = "ERROR: " ++ show dbEnvVar ++ " doesn't contain database URL"
     dbUrl <- fromMaybe (error errMsg) <$> lookupEnv dbEnvVar
-    Postgres.connectPostgreSQL (toS dbUrl) >>= mainStore
+    Postgres.connectPostgreSQL (toS dbUrl) >>= mainQuery
+
+mainQuery
+    :: Postgres.Connection
+    -> IO ()
+mainQuery conn =
+    Beam.withDatabaseDebug putStrLn conn testNewestPathSumsSelect_5
+        >>= printUSD
+  where
+    printUSD :: [( Test.Sym
+                 , Test.SlippageQty (Test.OneDiv 20) "USD"
+                 , Test.SlippageQty (Test.OneDiv 20) "USD"
+                 )]
+             -> IO ()
+    printUSD = print
 
 mainStore
     :: Postgres.Connection

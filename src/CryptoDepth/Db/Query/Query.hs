@@ -1,7 +1,12 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 module CryptoDepth.Db.Query.Query
-( newestSellPathSumsSelect
+( newestPathSumsSelect_5
+, PathTable
+, SlippageQty
+, CD.Sym
+, CD.OneDiv
+, KnownSymbol
 )
 where
 
@@ -29,18 +34,21 @@ type PathSumQuery s numeraire slippage =
         , QExpr PgExpressionSyntax s (SlippageQty slippage numeraire)
         )
 
-newestSellPathSumsSelect
-    :: forall numeraire slippage notSureWhatThisShouldBe.
+newestPathSumsSelect_5
+    :: forall numeraire slippage.
     ( KnownSymbol numeraire
     , PathTable numeraire Postgres
-    , PathQuantity slippage numeraire notSureWhatThisShouldBe
     )
     => SqlSelect PgSelectSyntax
         ( Text
-        , SlippageQty slippage numeraire
+        , SlippageQty (CD.OneDiv 20) numeraire
+        , SlippageQty (CD.OneDiv 20) numeraire
         )
-newestSellPathSumsSelect =
-    select newestSellPathSums
+newestPathSumsSelect_5 = select $ do
+    (buySym, buyQty)   <- newestBuyPathSums
+    (sellSym, sellQty) <- newestSellPathSums
+    guard_ (buySym ==. sellSym)
+    return (buySym, buyQty, sellQty)
 
 -- | Return slippage sums when going from 'numeraire' to symbol (ie. buying "symbol")
 newestBuyPathSums
