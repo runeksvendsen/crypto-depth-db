@@ -3,6 +3,13 @@ module CryptoDepth.Db.Internal.Table.Path
 ( module CryptoDepth.Db.Internal.Table.Path
 , RunT, Run, RunId
 , Columnar'(Columnar')
+-- * Re-exports
+, SymVenue
+, NonEmpty
+, Tagged
+, Money.Dense
+, OneDiv
+, KnownSymbol
 )
 where
 

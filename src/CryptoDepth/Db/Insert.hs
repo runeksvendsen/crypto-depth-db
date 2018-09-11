@@ -4,12 +4,13 @@ module CryptoDepth.Db.Insert
 where
 
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Insert.Run        (storeRun, UTCTime, RunId)
+import CryptoDepth.Db.Insert.Run        (storeRun, RunId)
 import CryptoDepth.Db.Insert.Path       (storePaths)
 import CryptoDepth.Db.Insert.Book       (storeBooks)
 
 import qualified CryptoDepth            as CD
 import Database.Beam.Postgres           (Pg)
+import Data.Time.LocalTime              (TimeZone(..), utcToLocalTime)
 
 
 type OnePercent = CD.OneDiv 100
@@ -19,7 +20,7 @@ insertAll
     -> [CD.ABook]
     -> Pg ()
 insertAll time books = do
-    runId <- storeRun time
+    runId <- storeRun (utcToLocalTime gmt time)
     storeBooks runId books
     insertPaths
         runId
@@ -27,6 +28,13 @@ insertAll time books = do
         (liquidPathsMap books)
         (liquidPathsMap books)
         (liquidPathsMap books)
+  where
+    gmt :: TimeZone
+    gmt = TimeZone
+        { timeZoneMinutes = 0
+        , timeZoneSummerOnly = False
+        , timeZoneName = "GMT"
+        }
 
 liquidPathsMap
     :: KnownSymbol numeraire

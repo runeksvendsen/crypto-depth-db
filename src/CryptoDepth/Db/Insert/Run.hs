@@ -1,7 +1,8 @@
 module CryptoDepth.Db.Insert.Run
 ( storeRun
 , RunId
-, UTCTime
+-- * Re-exports
+, LocalTime
 )
 where
 
@@ -14,7 +15,7 @@ import Database.Beam.Postgres                       (Pg)
 import Database.Beam.Backend.SQL.BeamExtensions     (runInsertReturningList)
 
 
-storeRun :: UTCTime -> Pg RunId
+storeRun :: LocalTime -> Pg RunId
 storeRun time = fmap (Beam.pk . getSingleResult) $
     runInsertReturningList (Db._runInfo Db.cryptoDepthDb) $
         Beam.insertExpressions [Run Beam.default_ (Beam.val_ time)]

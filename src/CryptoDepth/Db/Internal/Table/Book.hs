@@ -2,6 +2,8 @@
 module CryptoDepth.Db.Internal.Table.Book
 ( module CryptoDepth.Db.Internal.Table.Book
 , RunT, Run, RunId
+-- * Re-exports
+, Vector
 )
 where
 

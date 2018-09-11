@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module CryptoDepth.Db.Orphans where
 
@@ -12,33 +13,35 @@ import qualified Money
 import qualified Data.Aeson             as Json
 import Database.Beam.Backend
 import Database.Beam.Postgres
+import Database.Beam.Postgres.Syntax    (PgValueSyntax)
 import           Database.PostgreSQL.Simple.FromField
 import           Text.Read
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BL
+
 import Data.Typeable
+import Data.Scientific  (Scientific)
 
 
 -- Encode
-
 instance HasSqlValueSyntax be String => HasSqlValueSyntax be (NonEmpty SymVenue) where
   sqlValueSyntax = autoSqlValueSyntax
 
-instance (HasSqlValueSyntax be String, KnownSymbol currency)
-    => HasSqlValueSyntax be (Money.Dense currency) where
-  sqlValueSyntax = autoSqlValueSyntax
+-- NB: loses precision (Rational -> Double)
+instance HasSqlValueSyntax be Double => HasSqlValueSyntax be (Money.Dense currency) where
+  sqlValueSyntax = (sqlValueSyntax :: Double -> be) . realToFrac . toRational
 
 instance Json.ToJSON SomeOrder
 instance Json.FromJSON SomeOrder
 
-instance HasSqlValueSyntax be String => HasSqlValueSyntax be SomeOrder where
-  sqlValueSyntax = autoSqlValueSyntax
+instance HasSqlValueSyntax be BS.ByteString => HasSqlValueSyntax be SomeOrder where
+  sqlValueSyntax = (sqlValueSyntax :: BS.ByteString -> be) . toS . Json.encode
 
-instance HasSqlValueSyntax be String => HasSqlValueSyntax be (Vector SomeOrder) where
-  sqlValueSyntax = autoSqlValueSyntax
+instance HasSqlValueSyntax be BS.ByteString => HasSqlValueSyntax be (Vector SomeOrder) where
+  sqlValueSyntax = (sqlValueSyntax :: BS.ByteString -> be) . toS . Json.encode
 
 
 -- Decode
-
 parseFromField
   :: forall a. Typeable a
   => (BS.ByteString -> Maybe a)
@@ -55,7 +58,10 @@ instance FromField (NonEmpty SymVenue) where
 instance FromBackendRow Postgres (NonEmpty SymVenue)
 
 instance KnownSymbol currency => FromField (Money.Dense currency) where
-  fromField = parseFromField (readMaybe . toS)
+  fromField f bsM = do
+    double <- fromField f bsM
+    let denseM = Money.dense . (toRational :: Double -> Rational) $ double
+    maybe (returnError ConversionFailed f "Failed to parse 'Dense' from 'Double'") pure denseM
 instance KnownSymbol currency => FromBackendRow Postgres (Money.Dense currency)
 
 instance FromField SomeOrder where

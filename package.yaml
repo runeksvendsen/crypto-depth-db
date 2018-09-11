@@ -26,6 +26,7 @@ dependencies:
 - crypto-venues
 - orderbook
 - beam-core
+- beam-migrate
 - beam-postgres
 - postgresql-simple
 - time
@@ -36,6 +37,7 @@ dependencies:
 - vector
 - aeson
 - bytestring
+- scientific
 
 default-extensions:
 - DeriveGeneric
