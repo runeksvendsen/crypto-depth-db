@@ -26,7 +26,7 @@ type Quote = Text
 
 data BookT f
     = Book
-    { _bookRunId    :: PrimaryKey RunT f
+    { _bookRun      :: PrimaryKey RunT f
     , _bookVenue    :: Columnar f Venue
     , _bookBase     :: Columnar f Base
     , _bookQuote    :: Columnar f Quote
@@ -49,6 +49,6 @@ instance Table BookT where
         (Columnar f Base)
         (Columnar f Quote)
             deriving Generic
-    primaryKey Book{..} = BookId _bookRunId _bookVenue _bookBase _bookQuote
+    primaryKey Book{..} = BookId _bookRun _bookVenue _bookBase _bookQuote
 
 instance Beamable (PrimaryKey BookT)

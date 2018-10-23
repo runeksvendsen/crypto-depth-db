@@ -1,29 +1,47 @@
-{-# LANGUAGE TypeApplications #-}
 module CryptoDepth.Db.Internal.Migrate.Run
-( runMigration )
+( createTables
+, dropTables
+)
 where
 
+import           CryptoDepth.Db.Internal.Prelude
 import qualified CryptoDepth.Db.Internal.Migrate.Schema as Schema
-import qualified Database.Beam.Postgres         as Postgres
-import qualified Data.ByteString.Lazy.Char8     as BSL
+import qualified Data.ByteString.Lazy.Char8             as BSL
+import           Control.Monad                          (void)
+import           Control.Monad.IO.Class                 (liftIO)
+import           Control.Exception                      (catch)
 
-import           Control.Monad.IO.Class         (liftIO)
+import           Database.Beam.Migrate.Simple
+import qualified Database.Beam.Postgres                 as Pg
+import qualified Database.Beam.Postgres.Migrate         as Pg
+import qualified Database.Beam.Postgres.Syntax          as Pg
+import qualified Database.PostgreSQL.Simple             as PgSimple
+import qualified Database.PostgreSQL.Simple.Types       as PgSimple
 
-import           Database.Beam.Migrate.Simple   (runSimpleMigration,
-                                                 simpleMigration)
-import           Database.Beam.Postgres         (Pg, PgCommandSyntax, Postgres)
-import           Database.Beam.Postgres.Migrate (migrationBackend)
-import           Database.Beam.Postgres.Syntax  (fromPgCommand,
-                                                 pgRenderSyntaxScript)
 
-runMigration :: Postgres.Connection -> IO ()
-runMigration conn =
-  liftIO $ do
-    mcommands <- simpleMigration migrationBackend conn Schema.checkedDB
-    case mcommands of
-      Nothing ->
-        fail "Something went wrong constructing migration"
-      Just [] ->
-        putStrLn "Already up to date"
-      Just commands ->
-        runSimpleMigration @PgCommandSyntax @Postgres @_ @Pg conn commands
+createTables :: Pg.Connection -> IO (CheckedDatabaseSettings Pg.Postgres Schema.CryptoDepthDb)
+createTables conn = runMigration conn Schema.dbCreate
+
+dropTables
+  :: Pg.Connection
+  -> CheckedDatabaseSettings Pg.Postgres Schema.CryptoDepthDb
+  -> IO ()
+dropTables conn checkedDb = runMigration conn (Schema.dbDelete checkedDb)
+
+runMigration conn migration =
+    let executeFunction = (tryExecute conn <=< debugPrintQuery) . newSqlQuery
+        tryExecute conn query =
+            catch (void $ PgSimple.execute_ conn query)
+            (\err -> putStrLn ("ERROR: " ++ show (err :: PgSimple.SqlError)))
+    in runMigrationSteps 0 Nothing migration
+          (\_ _ -> executeMigration executeFunction)
+
+debugPrintQuery :: PgSimple.Query -> IO PgSimple.Query
+debugPrintQuery query =
+    putStrLnErr (toS $ PgSimple.fromQuery query) >> return query
+
+newSqlQuery :: Pg.PgCommandSyntax -> PgSimple.Query
+newSqlQuery syntax =
+    PgSimple.Query (toS sqlFragment)
+  where
+    sqlFragment = Pg.pgRenderSyntaxScript . Pg.fromPgCommand $ syntax

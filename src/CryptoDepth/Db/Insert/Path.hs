@@ -19,7 +19,7 @@ storePaths
     => RunId
     -> CD.Map CD.Sym (CD.LiquidPaths numeraire slippageEdgeWeight)
     -> Pg ()
-storePaths runId paths = Beam.runInsert $
+storePaths _runId paths = Beam.runInsert $
     Beam.insert (Db.pathTable Db.cryptoDepthDb :: Db.PathEntityType Postgres numeraire) $
         Beam.insertValues $ concatMap (toPaths . snd) (Map.toList paths)
   where
@@ -30,12 +30,12 @@ storePaths runId paths = Beam.runInsert $
     toPath :: CD.EdgePath numeraire
            -> Path numeraire
     toPath ep = Path
-        { _pathRunId    = runId
+        { _pathRun    = _runId
         , _pathSrc      = CD.srcSym ep
         , _pathDst      = CD.dstSym ep
         , _pathPath     = CD.pathDescr ep
-        , _pathQty_01   = CD.pathQty ep
-        , _pathQty_05   = CD.pathQty ep
-        , _pathQty_1    = CD.pathQty ep
-        , _pathQty_5    = CD.pathQty ep
+        , _pathQty01   = CD.pathQty ep
+        , _pathQty05   = CD.pathQty ep
+        , _pathQty1    = CD.pathQty ep
+        , _pathQty5    = CD.pathQty ep
         }

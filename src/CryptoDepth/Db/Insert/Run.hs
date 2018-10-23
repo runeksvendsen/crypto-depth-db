@@ -17,7 +17,7 @@ import Database.Beam.Backend.SQL.BeamExtensions     (runInsertReturningList)
 
 storeRun :: LocalTime -> Pg RunId
 storeRun time = fmap (Beam.pk . getSingleResult) $
-    runInsertReturningList (Db._runInfo Db.cryptoDepthDb) $
+    runInsertReturningList (Db._runs Db.cryptoDepthDb) $
         Beam.insertExpressions [Run Beam.default_ (Beam.val_ time)]
   where
     getSingleResult lst =

@@ -16,7 +16,7 @@ storeBooks
     :: RunId
     -> [CD.ABook]
     -> Pg ()
-storeBooks runId books = Beam.runInsert $
+storeBooks _runId books = Beam.runInsert $
     Beam.insert (Db._books Db.cryptoDepthDb) $
         Beam.insertValues $ map toBook books
   where
@@ -30,7 +30,7 @@ storeBooks runId books = Beam.runInsert $
     fromOB ob =
         let (bids, asks) = someBookOrders (toSomeBook ob) in
         Book
-        { _bookRunId    = runId
+        { _bookRun      = _runId
         , _bookVenue    = toS $ symbolVal (Proxy :: Proxy venue)
         , _bookBase     = toS $ symbolVal (Proxy :: Proxy base)
         , _bookQuote    = toS $ symbolVal (Proxy :: Proxy quote)

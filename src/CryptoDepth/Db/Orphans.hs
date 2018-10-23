@@ -6,7 +6,7 @@ module CryptoDepth.Db.Orphans where
 import CryptoDepth.Db.Internal.Prelude
 
 import Database.Beam.Backend.SQL.SQL92  (HasSqlValueSyntax(..), autoSqlValueSyntax)
-import CryptoDepth.Internal.Types       (SymVenue)
+import CryptoDepth.Types                (SymVenue, Amount)
 import OrderBook.Types                  (SomeOrder)
 import Data.List.NonEmpty               (NonEmpty)
 import qualified Money
@@ -15,21 +15,20 @@ import Database.Beam.Backend
 import Database.Beam.Postgres
 import Database.Beam.Postgres.Syntax    (PgValueSyntax)
 import           Database.PostgreSQL.Simple.FromField
+import           Database.PostgreSQL.Simple.ToField
 import           Text.Read
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
 
 import Data.Typeable
-import Data.Scientific  (Scientific)
-
+import Debug.Trace
 
 -- Encode
 instance HasSqlValueSyntax be String => HasSqlValueSyntax be (NonEmpty SymVenue) where
   sqlValueSyntax = autoSqlValueSyntax
 
--- NB: loses precision (Rational -> Double)
-instance HasSqlValueSyntax be Double => HasSqlValueSyntax be (Money.Dense currency) where
-  sqlValueSyntax = (sqlValueSyntax :: Double -> be) . realToFrac . toRational
+instance HasSqlValueSyntax be Int64 => HasSqlValueSyntax be (Amount currency) where
+  sqlValueSyntax = (sqlValueSyntax :: Int64 -> be) . fromIntegral
 
 instance Json.ToJSON SomeOrder
 instance Json.FromJSON SomeOrder
@@ -37,8 +36,11 @@ instance Json.FromJSON SomeOrder
 instance HasSqlValueSyntax be BS.ByteString => HasSqlValueSyntax be SomeOrder where
   sqlValueSyntax = (sqlValueSyntax :: BS.ByteString -> be) . toS . Json.encode
 
-instance HasSqlValueSyntax be BS.ByteString => HasSqlValueSyntax be (Vector SomeOrder) where
-  sqlValueSyntax = (sqlValueSyntax :: BS.ByteString -> be) . toS . Json.encode
+instance ToField SomeOrder where
+  toField = toField @BS.ByteString . toS . Json.encode
+
+-- instance HasSqlValueSyntax be BS.ByteString => HasSqlValueSyntax be (Vector SomeOrder) where
+--   sqlValueSyntax = (sqlValueSyntax :: BS.ByteString -> be) . toS . Json.encode
 
 
 -- Decode
@@ -57,12 +59,10 @@ instance FromField (NonEmpty SymVenue) where
   fromField = parseFromField (readMaybe . toS)
 instance FromBackendRow Postgres (NonEmpty SymVenue)
 
-instance KnownSymbol currency => FromField (Money.Dense currency) where
-  fromField f bsM = do
-    double <- fromField f bsM
-    let denseM = Money.dense . (toRational :: Double -> Rational) $ double
-    maybe (returnError ConversionFailed f "Failed to parse 'Dense' from 'Double'") pure denseM
-instance KnownSymbol currency => FromBackendRow Postgres (Money.Dense currency)
+instance KnownSymbol currency => FromField (Amount currency) where
+  fromField f bsM =
+    fromIntegral @Int64 <$> fromField f bsM
+instance KnownSymbol currency => FromBackendRow Postgres (Amount currency)
 
 instance FromField SomeOrder where
   fromField = parseFromField (Json.decode . toS)
