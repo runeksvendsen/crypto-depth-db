@@ -2,8 +2,13 @@ resolver: lts-12.5
 
 packages:
 - .
-- /Users/runesvendsen/code/beam/beam-core
-- /Users/runesvendsen/code/beam/beam-postgres
+- location:
+    git: https://github.com/runeksvendsen/beam.git
+    commit: ecf3e111510e0668b89a1aa904c0bf17cc6b680e
+    subdirs:
+      - beam-core
+      - beam-postgres
+  extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/crypto-depth.git
     commit: 3cb03d051423dc720c8a8522ef5019e80fac8e04

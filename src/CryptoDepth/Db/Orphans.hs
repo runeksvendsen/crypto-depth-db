@@ -27,8 +27,9 @@ import Debug.Trace
 instance HasSqlValueSyntax be String => HasSqlValueSyntax be (NonEmpty SymVenue) where
   sqlValueSyntax = autoSqlValueSyntax
 
-instance HasSqlValueSyntax be Int64 => HasSqlValueSyntax be (Amount currency) where
-  sqlValueSyntax = (sqlValueSyntax :: Int64 -> be) . fromIntegral
+-- TODO: Change when resolved: https://github.com/tathougies/beam/issues/324
+instance HasSqlValueSyntax be Double => HasSqlValueSyntax be (Amount currency) where
+  sqlValueSyntax = (sqlValueSyntax :: Double -> be) . fromIntegral
 
 instance Json.ToJSON SomeOrder
 instance Json.FromJSON SomeOrder
@@ -61,7 +62,8 @@ instance FromBackendRow Postgres (NonEmpty SymVenue)
 
 instance KnownSymbol currency => FromField (Amount currency) where
   fromField f bsM =
-    fromIntegral @Int64 <$> fromField f bsM
+    -- TODO: Change when resolved: https://github.com/tathougies/beam/issues/324
+    fromIntegral . round @Double <$> fromField f bsM
 instance KnownSymbol currency => FromBackendRow Postgres (Amount currency)
 
 instance FromField SomeOrder where

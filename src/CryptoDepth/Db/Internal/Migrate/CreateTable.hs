@@ -33,7 +33,7 @@ ordersDT = DataType (pgUnboundedArrayType pgTextType)
 
 quantityDT :: IsSql2008BigIntDataTypeSyntax syntax =>
     DataType syntax (Tagged (OneDiv denominator) (Amount numeraire))
-quantityDT = DataType bigIntType
+quantityDT = DataType doubleType    -- TODO: Change when resolved: https://github.com/tathougies/beam/issues/324
 
 deleteInitial
     :: CheckedDatabaseSettings Postgres CryptoDepthDb

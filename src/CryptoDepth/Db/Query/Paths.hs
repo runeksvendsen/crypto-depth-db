@@ -23,7 +23,6 @@ import Database.Beam.Query.Internal         (QNested)
 import Database.Beam.Postgres
 import Database.Beam.Postgres.Syntax        (PgExpressionSyntax)
 
--- PathInfo
 
 -- |
 newestBuySellPaths
