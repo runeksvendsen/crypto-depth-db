@@ -1,4 +1,4 @@
-module CryptoDepth.Db.Insert.RunSymbol
+module CryptoDepth.Db.Internal.Insert.RunSymbol
 ( storeRunSymbols
 )
 where

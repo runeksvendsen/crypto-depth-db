@@ -7,10 +7,10 @@ module CryptoDepth.Db.Insert
 where
 
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Insert.Run        (storeRun, RunId)
-import CryptoDepth.Db.Insert.Path       (storePaths)
-import CryptoDepth.Db.Insert.Book       (storeBooks)
-import CryptoDepth.Db.Insert.RunSymbol  (storeRunSymbols)
+import CryptoDepth.Db.Internal.Insert.Run        (storeRun, RunId)
+import CryptoDepth.Db.Internal.Insert.Path       (storePaths)
+import CryptoDepth.Db.Internal.Insert.Book       (storeBooks)
+import CryptoDepth.Db.Internal.Insert.RunSymbol  (storeRunSymbols)
 import CryptoDepth.Db.Internal.Util     (liquidPathsMap)
 
 import qualified CryptoDepth            as CD

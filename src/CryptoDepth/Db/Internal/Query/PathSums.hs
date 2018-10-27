@@ -1,6 +1,6 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE RankNTypes #-}
-module CryptoDepth.Db.Query.PathSums
+module CryptoDepth.Db.Internal.Query.PathSums
 ( testNewestPathSumsSelect_5
 , PathTable
 , SlippageQty
@@ -11,8 +11,8 @@ module CryptoDepth.Db.Query.PathSums
 where
 
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Query.Common
-import CryptoDepth.Db.Query.RunSymbols
+import CryptoDepth.Db.Internal.Query.Common
+import CryptoDepth.Db.Internal.Query.RunSymbols
 import CryptoDepth.Db
 import CryptoDepth.Db.Internal.Table.Run
 import CryptoDepth.Db.Internal.Table.Path

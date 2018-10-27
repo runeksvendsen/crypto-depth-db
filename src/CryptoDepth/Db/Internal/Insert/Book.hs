@@ -1,4 +1,4 @@
-module CryptoDepth.Db.Insert.Book
+module CryptoDepth.Db.Internal.Insert.Book
 ( storeBooks
 )
 where

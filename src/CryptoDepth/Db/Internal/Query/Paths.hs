@@ -1,6 +1,6 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE RankNTypes #-}
-module CryptoDepth.Db.Query.Paths
+module CryptoDepth.Db.Internal.Query.Paths
 ( newestBuySellPaths
 , PathTable
 , CD.Sym
@@ -10,7 +10,7 @@ module CryptoDepth.Db.Query.Paths
 where
 
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Query.Common
+import CryptoDepth.Db.Internal.Query.Common
 import CryptoDepth.Db
 import CryptoDepth.Db.Internal.Table.Run
 import CryptoDepth.Db.Internal.Table.Path

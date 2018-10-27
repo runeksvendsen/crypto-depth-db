@@ -1,4 +1,4 @@
-module CryptoDepth.Db.Insert.Path
+module CryptoDepth.Db.Internal.Insert.Path
 ( storePaths
 , RunId
 )

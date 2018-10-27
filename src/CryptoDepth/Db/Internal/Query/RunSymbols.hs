@@ -1,13 +1,13 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE RankNTypes #-}
-module CryptoDepth.Db.Query.RunSymbols
+module CryptoDepth.Db.Internal.Query.RunSymbols
 ( newestSymbolsSelect
 , CD.Sym
 )
 where
 
 import CryptoDepth.Db.Internal.Prelude
-import CryptoDepth.Db.Query.Common
+import CryptoDepth.Db.Internal.Query.Common
 import CryptoDepth.Db
 import CryptoDepth.Db.Internal.Table.Run
 import CryptoDepth.Db.Internal.Table.Path

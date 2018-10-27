@@ -1,4 +1,4 @@
-module CryptoDepth.Db.Insert.Run
+module CryptoDepth.Db.Internal.Insert.Run
 ( storeRun
 , RunId
 -- * Re-exports

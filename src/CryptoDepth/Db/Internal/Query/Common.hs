@@ -1,7 +1,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE RankNTypes #-}
-module CryptoDepth.Db.Query.Common
-( module CryptoDepth.Db.Query.Common
+module CryptoDepth.Db.Internal.Query.Common
+( module CryptoDepth.Db.Internal.Query.Common
 , PathTable
 , CD.Sym
 , CD.OneDiv

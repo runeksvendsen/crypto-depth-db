@@ -4,5 +4,5 @@ module CryptoDepth.Db.Query
 )
 where
 
-import CryptoDepth.Db.Query.PathSums as PathSums
-import CryptoDepth.Db.Query.Paths as Paths
+import CryptoDepth.Db.Internal.Query.PathSums as PathSums
+import CryptoDepth.Db.Internal.Query.Paths as Paths
