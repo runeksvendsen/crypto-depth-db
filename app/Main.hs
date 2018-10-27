@@ -20,7 +20,6 @@ import qualified Data.Text                          as T
 
 import Data.Time.Clock                              (getCurrentTime)
 import Text.Printf                                  (printf)
-import Control.Monad.IO.Class                       (liftIO)
 import Database.PostgreSQL.Simple.Transaction       (withTransaction)
 import System.Environment                           (lookupEnv)
 -- TEST

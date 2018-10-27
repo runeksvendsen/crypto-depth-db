@@ -11,6 +11,7 @@ module CryptoDepth.Db.Internal.Prelude
 , Text
 , Vector
 , Proxy(..)
+, MonadIO, liftIO
 , toS
 , printf
 , module Monad
@@ -40,6 +41,7 @@ import Control.Monad as Monad           ((<=<), (>=>))
 import qualified System.IO              as IO
 import Database.Beam.Schema.Tables      (Columnar, Columnar'(..))
 import Debug.Trace                      (trace)
+import Control.Monad.IO.Class           (MonadIO, liftIO)
 
 
 putStrLnErr :: String -> IO ()

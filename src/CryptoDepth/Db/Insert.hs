@@ -1,6 +1,8 @@
 module CryptoDepth.Db.Insert
 ( insertAll
-, liquidPathsMap
+-- * Re-exports
+, PGTransaction
+, runPGTransactionT
 )
 where
 
@@ -9,21 +11,28 @@ import CryptoDepth.Db.Insert.Run        (storeRun, RunId)
 import CryptoDepth.Db.Insert.Path       (storePaths)
 import CryptoDepth.Db.Insert.Book       (storeBooks)
 import CryptoDepth.Db.Insert.RunSymbol  (storeRunSymbols)
+import CryptoDepth.Db.Internal.Util     (liquidPathsMap)
 
 import qualified CryptoDepth            as CD
-import Database.Beam.Postgres           (Pg)
+import Database.Beam.Postgres           (Pg, Connection)
+import Database.PostgreSQL.Transaction  (PGTransaction, runPGTransactionT)
 import Data.Time.LocalTime              (TimeZone(..), utcToLocalTime)
 import qualified Data.HashMap.Strict    as Map
 
 
--- |
-type OnePercent = CD.OneDiv 100
-
 insertAll
+    :: (Pg [CD.Sym] -> IO [CD.Sym]) -- ^ Beam.withDatabase or withDatabaseDebug
+    -> UTCTime
+    -> [CD.ABook]
+    -> PGTransaction [CD.Sym]
+insertAll runPg time books =
+    liftIO . runPg $ insertAllPg time books
+
+insertAllPg
     :: UTCTime
     -> [CD.ABook]
     -> Pg [CD.Sym]
-insertAll time books = do
+insertAllPg time books = do
     runId <- storeRun (utcToLocalTime gmt time)
     storeBooks runId books
     symbols <- insertPaths
@@ -42,15 +51,6 @@ insertAll time books = do
         , timeZoneSummerOnly = False
         , timeZoneName = "GMT"
         }
-
--- TODO: move somewhere else
-liquidPathsMap
-    :: KnownSymbol numeraire
-    => [CD.ABook]
-    -> CD.Map CD.Sym (CD.LiquidPaths numeraire OnePercent)
-liquidPathsMap books =
-    let (graph, rateMap, nodeMap) = CD.buildDepthGraph books
-    in CD.symLiquidPaths rateMap nodeMap graph
 
 -- | Insert paths for all numeraires, and return a list of
 --    all distinct symbols

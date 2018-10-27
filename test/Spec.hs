@@ -1,6 +1,7 @@
 module Main where
 
 import           CryptoDepth.Db.Internal.Prelude
+import           CryptoDepth.Db.Internal.Util               (liquidPathsMap)
 import           Orphans
 import           CryptoDepth.Db.Internal.Orphans
 import qualified CryptoDepth.Db.Internal.Migrate.Run        as Run
@@ -82,8 +83,7 @@ hspecMain books conn = hspec $ do
     testPathSelect' conn (sym, pathInfos) =
         it ("returns correct PathInfos for " ++ toS sym) $
             testPathSelect conn sym pathInfos
-    allPathsInfos = CD.allPathsInfos
-        . Insert.liquidPathsMap $ books
+    allPathsInfos = CD.allPathsInfos . liquidPathsMap $ books
 
 type TestSlippage = Test.OneDiv 20
 type TestNumeraire = "USD"
@@ -167,7 +167,6 @@ mainStore
     -> IO [CD.Sym]
 mainStore conn books = do
     time <- getCurrentTime
-    -- TODO: 'withTransaction' should be part of library
-    withTransaction conn $
-        Beam.withDatabase conn $
-            Insert.insertAll time books
+    Insert.runPGTransactionT
+        (Insert.insertAll (Beam.withDatabase conn) time books)
+        conn

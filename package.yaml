@@ -29,6 +29,7 @@ dependencies:
 - beam-migrate
 - beam-postgres
 - postgresql-simple
+- postgresql-transactional
 - time
 - unordered-containers
 - safe-money
