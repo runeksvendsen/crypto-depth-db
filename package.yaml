@@ -62,20 +62,6 @@ library:
   - -fno-warn-name-shadowing
 
 executables:
-  crypto-depth-db-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -Wall
-    - -fno-warn-name-shadowing
-    dependencies:
-    - crypto-depth-db
-    - http-client
-    - monad-parallel
-    - http-client-tls
-    - logging
-
-executables:
   write-test-data:
     main:                WriteTestData.hs
     source-dirs:         test/util
