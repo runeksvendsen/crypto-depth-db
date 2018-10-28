@@ -53,17 +53,12 @@ testNewestPathSumsSelect_5
 testNewestPathSumsSelect_5 =  do
     symMap <- Map.fromList <$>
         runSelectReturningList newestPathSumsSelect_5
-    return $ trace "Got symMap" ()
     keyLst <- runSelectReturningList newestSymbolsSelect
-    return $ trace "Got keyLst" ()
     let zeroQtyMap = Map.fromList $ map zeroQtySym keyLst
-    -- TODO: correct precendence?
     return (symMap `Map.union` zeroQtyMap)
   where
-    zeroQty :: Tagged slippage (CD.Amount currency)
-    zeroQty = Tagged $ fromIntegral 0
     zeroQtySym :: Sym -> (Sym, (SlippageQty slip numeraire, SlippageQty slip numeraire))
-    zeroQtySym sym = (sym, (zeroQty, zeroQty))
+    zeroQtySym sym = (sym, (Tagged 0, Tagged 0))
 
 newestPathSumsSelect_5
     :: forall numeraire.
