@@ -32,12 +32,6 @@ import qualified Data.Aeson                                 as Json
 import Data.List                                            (sort, sortOn)
 
 
-{-
-    export DB_URL="host=localhost port=5432 sslmode=disable user=test password=test dbname=test connect_timeout=10"
-
-    docker run -p 5432:5432 --name postgres-test -e POSTGRES_PASSWORD=test -e POSTGRES_USER=test -e POSTGRES_DB=test -d postgres:9.6
--}
-
 main :: IO ()
 main = do
     books <- either error return =<<
@@ -61,13 +55,16 @@ withPreparedDb f =
 
 openConn :: IO Postgres.Connection
 openConn = do
-    dbUrl <- dbUrlFromEnvVar    -- TODO: Read from test/config/db.cfg
+    dbUrl <- dbUrlFromConf
     Postgres.connectPostgreSQL (toS dbUrl)
   where
-    dbUrlFromEnvVar =
-        fromMaybe (error errMsg) <$> lookupEnv dbEnvVar
-    dbEnvVar = "DB_URL"
-    errMsg = "ERROR: " ++ show dbEnvVar ++ " doesn't contain database URL"
+    dbUrlFromConf = do
+        Json.Object dbConf <- either error return =<<
+            Json.eitherDecodeFileStrict "test/config/docker.json"
+        let dbUrlKey = "db_url"
+            (Json.String dbUrl) = fromMaybe (error $ show dbUrlKey ++ " not found") $
+                Map.lookup dbUrlKey dbConf
+        return dbUrl
 
 hspecMain
     :: [CD.ABook]
