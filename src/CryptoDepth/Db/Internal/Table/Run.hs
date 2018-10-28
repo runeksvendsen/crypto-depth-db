@@ -1,20 +1,24 @@
 module CryptoDepth.Db.Internal.Table.Run
 ( RunT(..)
 , Run, RunId
-, UTCTime
+, PrimaryKey(RunId)
+-- * Re-exports
+, LocalTime
+, Word32
 )
 where
 
 import CryptoDepth.Db.Internal.Prelude
 import Database.Beam
+import Database.Beam.Backend.SQL.Types  (SqlSerial)
 import Data.Word                        (Word32)
-import Data.Time.LocalTime              ()
+import Data.Time.LocalTime              (LocalTime)
 
 
 data RunT f
     = Run
-    { _runId    :: Columnar f Word32
-    , _runTime  :: Columnar f UTCTime
+    { _runId    :: Columnar f (SqlSerial Word32)
+    , _runTime  :: Columnar f LocalTime
     } deriving Generic
 
 deriving instance Show (PrimaryKey RunT Identity)
@@ -29,7 +33,7 @@ deriving instance Eq Run
 instance Beamable RunT
 
 instance Table RunT where
-    data PrimaryKey RunT f = RunId (Columnar f Word32) deriving Generic
+    data PrimaryKey RunT f = RunId (Columnar f (SqlSerial Word32)) deriving Generic
     primaryKey = RunId . _runId
 
 instance Beamable (PrimaryKey RunT)

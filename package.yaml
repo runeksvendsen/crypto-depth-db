@@ -26,8 +26,10 @@ dependencies:
 - crypto-venues
 - orderbook
 - beam-core
+- beam-migrate
 - beam-postgres
 - postgresql-simple
+- postgresql-transactional
 - time
 - unordered-containers
 - safe-money
@@ -36,6 +38,7 @@ dependencies:
 - vector
 - aeson
 - bytestring
+- scientific
 
 default-extensions:
 - DeriveGeneric
@@ -56,29 +59,31 @@ library:
   source-dirs: src
   ghc-options:
   - -Wall
+  - -fno-warn-name-shadowing
 
 executables:
-  crypto-depth-db-exe:
-    main:                Main.hs
-    source-dirs:         app
+  write-test-data:
+    main:                WriteTestData.hs
+    source-dirs:         test/util
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+    - -Wall
+    - -fno-warn-name-shadowing
     dependencies:
-    - crypto-depth-db
+    - crypto-depth
+    - crypto-depth-db # TMP
     - http-client
-    - monad-parallel
     - http-client-tls
     - logging
+    - optparse-applicative
 
 tests:
   crypto-depth-db-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+    - -Wall
+    - -fno-warn-name-shadowing
     dependencies:
     - crypto-depth-db
+    - hashable          # Orphans
+    - hspec
