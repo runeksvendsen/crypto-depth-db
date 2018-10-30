@@ -1,7 +1,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 module CryptoDepth.Db.Internal.Query.PathSums
-( testNewestPathSumsSelect_5
+( testNewestPathSumsSelect
 , PathTable
 , SlippageQty
 , CD.Sym
@@ -23,6 +23,7 @@ import qualified Data.HashMap.Strict    as Map
 
 import Database.Beam
 import Database.Beam.Query.Internal         (QNested)
+import Database.Beam.Query                  (QueryInaccessible)
 import Database.Beam.Postgres
 import Database.Beam.Postgres.Syntax        (PgExpressionSyntax)
 
@@ -39,20 +40,23 @@ type PathSumQuery s numeraire slippage =
         )
 
 
-testNewestPathSumsSelect_5
-    :: ( KnownSymbol numeraire
-       , PathTable numeraire Postgres
-       )
+testNewestPathSumsSelect
+    ::
+    ( KnownSymbol numeraire
+    , PathTable numeraire Postgres
+    , PathQuantity slippage numeraire
+        (QExpr PgExpressionSyntax (QNested QueryInaccessible))
+    )
     => Pg
         (Map.HashMap
             Sym
-            ( SlippageQty (OneDiv 20) numeraire
-            , SlippageQty (OneDiv 20) numeraire
+            ( SlippageQty slippage numeraire
+            , SlippageQty slippage numeraire
             )
         )
-testNewestPathSumsSelect_5 =  do
+testNewestPathSumsSelect =  do
     symMap <- Map.fromList <$>
-        runSelectReturningList newestPathSumsSelect_5
+        runSelectReturningList newestPathSumsSelect
     keyLst <- runSelectReturningList newestSymbolsSelect
     let zeroQtyMap = Map.fromList $ map zeroQtySym keyLst
     return (symMap `Map.union` zeroQtyMap)
@@ -60,18 +64,20 @@ testNewestPathSumsSelect_5 =  do
     zeroQtySym :: Sym -> (Sym, (SlippageQty slip numeraire, SlippageQty slip numeraire))
     zeroQtySym sym = (sym, (Tagged 0, Tagged 0))
 
-newestPathSumsSelect_5
-    :: forall numeraire.
+newestPathSumsSelect
+    ::
     ( KnownSymbol numeraire
     , PathTable numeraire Postgres
+    , PathQuantity slippage numeraire
+        (QExpr PgExpressionSyntax (QNested QueryInaccessible))
     )
     => SqlSelect PgSelectSyntax
         ( Text
-        , ( SlippageQty (CD.OneDiv 20) numeraire
-          , SlippageQty (CD.OneDiv 20) numeraire
+        , ( SlippageQty slippage numeraire
+          , SlippageQty slippage numeraire
           )
         )
-newestPathSumsSelect_5 = select $ do
+newestPathSumsSelect = select $ do
     (buySym, buyQty)   <- newestBuyPathSums
     (sellSym, sellQty) <- newestSellPathSums
     guard_ (buySym ==. sellSym)

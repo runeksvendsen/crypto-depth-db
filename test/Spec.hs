@@ -113,7 +113,7 @@ testSumSelect
     -> Postgres.Connection
     -> Expectation
 testSumSelect allPathsInfos conn =
-    Beam.withDatabase conn Test.testNewestPathSumsSelect_5
+    Beam.withDatabase conn Test.testNewestPathSumsSelect
         >>= assertEquals
   where
     assertEquals

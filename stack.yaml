@@ -4,7 +4,7 @@ packages:
 - .
 - location:
     git: https://github.com/runeksvendsen/beam.git
-    commit: ecf3e111510e0668b89a1aa904c0bf17cc6b680e
+    commit: 62e48d1fd27dc54f73e1184f89c0b52fee7a65d7
     subdirs:
       - beam-core
       - beam-postgres
