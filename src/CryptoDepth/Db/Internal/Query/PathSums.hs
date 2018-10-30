@@ -45,7 +45,7 @@ testNewestPathSumsSelect
     ( KnownSymbol numeraire
     , PathTable numeraire Postgres
     , PathQuantity slippage numeraire
-        (QExpr PgExpressionSyntax (QNested QueryInaccessible))
+        (QExpr PgExpressionSyntax (QNested (QNested QueryInaccessible)))
     )
     => Pg
         (Map.HashMap
@@ -69,7 +69,7 @@ newestPathSumsSelect
     ( KnownSymbol numeraire
     , PathTable numeraire Postgres
     , PathQuantity slippage numeraire
-        (QExpr PgExpressionSyntax (QNested QueryInaccessible))
+        (QExpr PgExpressionSyntax (QNested (QNested QueryInaccessible)))
     )
     => SqlSelect PgSelectSyntax
         ( Text
@@ -77,11 +77,14 @@ newestPathSumsSelect
           , SlippageQty slippage numeraire
           )
         )
-newestPathSumsSelect = select $ do
-    (buySym, buyQty)   <- newestBuyPathSums
-    (sellSym, sellQty) <- newestSellPathSums
-    guard_ (buySym ==. sellSym)
-    return (buySym, (buyQty, sellQty))
+newestPathSumsSelect = select $
+    orderBy_ buySellQtySum $ do
+        (buySym, buyQty)   <- newestBuyPathSums
+        (sellSym, sellQty) <- newestSellPathSums
+        guard_ (buySym ==. sellSym)
+        return (buySym, (buyQty, sellQty))
+  where
+    buySellQtySum (_, (buyQty', sellQty')) = desc_ (buyQty' + sellQty')
 
 -- | Return slippage sums when going from 'numeraire' to symbol (ie. buying "symbol")
 newestBuyPathSums
