@@ -2,6 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 module CryptoDepth.Db.Internal.Query.RunSymbols
 ( newestSymbolsSelect
+, newestSymbols
 , CD.Sym
 )
 where

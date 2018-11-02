@@ -54,15 +54,9 @@ testNewestPathSumsSelect
             , SlippageQty slippage numeraire
             )
         )
-testNewestPathSumsSelect =  do
-    symMap <- Map.fromList <$>
+testNewestPathSumsSelect =
+    Map.fromList <$>
         runSelectReturningList newestPathSumsSelect
-    keyLst <- runSelectReturningList newestSymbolsSelect
-    let zeroQtyMap = Map.fromList $ map zeroQtySym keyLst
-    return (symMap `Map.union` zeroQtyMap)
-  where
-    zeroQtySym :: Sym -> (Sym, (SlippageQty slip numeraire, SlippageQty slip numeraire))
-    zeroQtySym sym = (sym, (Tagged 0, Tagged 0))
 
 newestPathSumsSelect
     ::
@@ -94,7 +88,7 @@ newestBuyPathSums
        , PathQuantity slippage numeraire (QExpr PgExpressionSyntax (QNested s))
        )
     => PathSumQuery s numeraire slippage    -- ^ (symbol, slippageSum)
-newestBuyPathSums = newestPathSums _pathSrc _pathDst
+newestBuyPathSums = newestPathSums _pathDst
 
 -- | Return slippage sums when going from symbol to 'numeraire' (ie. selling "symbol")
 newestSellPathSums
@@ -104,11 +98,9 @@ newestSellPathSums
        , PathQuantity slippage numeraire (QExpr PgExpressionSyntax (QNested s))
        )
     => PathSumQuery s numeraire slippage    -- ^ (symbol, slippageSum)
-newestSellPathSums = newestPathSums _pathDst _pathSrc
+newestSellPathSums = newestPathSums _pathSrc
 
--- | Return slippage sums for paths from one specified symbol to another.
--- E.g. "newestPathSums isNumeraire groupField" returns the slippage sums
---  for "path"s grouped by "groupField path" (and where "isNumeraire path == numeraire")
+-- | Return slippage sums for paths with specified symbol
 newestPathSums
     :: forall numeraire s slippage.
        ( KnownSymbol numeraire
@@ -116,20 +108,33 @@ newestPathSums
        , PathQuantity slippage numeraire (QExpr PgExpressionSyntax (QNested s))
        )
     => ( PathT numeraire (QExpr PgExpressionSyntax (QNested s))
-            -> QExpr PgExpressionSyntax (QNested s) Text
-       )    -- ^ Symbol that is equal to 'numeraire' symbol
-    -> ( PathT numeraire (QExpr PgExpressionSyntax (QNested s))
             -> Columnar (QExpr PgExpressionSyntax (QNested s)) CD.Sym
        )    -- ^ Grouping by this symbol, return sum of path slippages for this symbol
     -> PathSumQuery s numeraire slippage    -- ^ (symbol, slippageSum)
-newestPathSums isNumeraire groupField =
-   aggregate_
-        (\path ->
-            ( group_ (groupField path)
-            , fromMaybe_ 0
-                (sum_
-                    (fromC' (pathQuantity path :: PathQtyExpr s slippage numeraire))
-                )
+newestPathSums groupField =
+   aggregate_ symGroupSumQty (newestSymQuantities groupField)
+  where
+    symGroupSumQty (sym, slippageQty) =
+        (group_ sym, fromMaybe_ 0 (sum_ slippageQty))
+
+-- | Return path slippage quantities for all symbols in "RunSymbol".
+-- Quantity is zero if no paths exist for the given symol.
+newestSymQuantities
+    :: forall numeraire s slippage.
+       ( KnownSymbol numeraire
+       , PathTable numeraire Postgres
+       , PathQuantity slippage numeraire (QExpr PgExpressionSyntax (QNested s))
+       )
+    => ( PathT numeraire (QExpr PgExpressionSyntax (QNested s))
+            -> Columnar (QExpr PgExpressionSyntax (QNested s)) CD.Sym
+       )    -- ^ Grouping by this symbol, return sum of path slippages for this symbol
+    -> Q PgSelectSyntax CryptoDepthDb (QNested s)
+            ( QExpr PgExpressionSyntax (QNested s) Text
+            , QExpr PgExpressionSyntax (QNested s) (SlippageQty slippage numeraire)
             )
-        )
-        (newestPaths isNumeraire)
+newestSymQuantities groupField = do
+    sym  <- newestSymbols
+    pathM <- leftJoin_ newestPathsAll (\path -> groupField path ==. _symbolSym sym)
+    return (_symbolSym sym, maybe_ 0 toPathQuantity pathM)
+  where
+    toPathQuantity path = fromC' (pathQuantity path :: PathQtyExpr s slippage numeraire)
