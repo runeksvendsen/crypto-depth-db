@@ -48,15 +48,14 @@ testNewestPathSumsSelect
         (QExpr PgExpressionSyntax (QNested (QNested QueryInaccessible)))
     )
     => Pg
-        (Map.HashMap
-            Sym
-            ( SlippageQty slippage numeraire
-            , SlippageQty slippage numeraire
-            )
-        )
+        [( CD.Sym
+         , ( SlippageQty slippage numeraire
+           , SlippageQty slippage numeraire
+           )
+         )
+        ]
 testNewestPathSumsSelect =
-    Map.fromList <$>
-        runSelectReturningList newestPathSumsSelect
+    runSelectReturningList newestPathSumsSelect
 
 newestPathSumsSelect
     ::
@@ -72,13 +71,14 @@ newestPathSumsSelect
           )
         )
 newestPathSumsSelect = select $
-    orderBy_ buySellQtySum $ do
+    orderBy_ buySellQtySumSym $ do
         (buySym, buyQty)   <- newestBuyPathSums
         (sellSym, sellQty) <- newestSellPathSums
         guard_ (buySym ==. sellSym)
         return (buySym, (buyQty, sellQty))
   where
-    buySellQtySum (_, (buyQty', sellQty')) = desc_ (buyQty' + sellQty')
+    buySellQtySumSym (sym, (buyQty', sellQty')) =
+        (desc_ $ buyQty' + sellQty', asc_ sym)
 
 -- | Return slippage sums when going from 'numeraire' to symbol (ie. buying "symbol")
 newestBuyPathSums

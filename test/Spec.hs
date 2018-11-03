@@ -29,7 +29,7 @@ import           Data.Time.Clock                            (getCurrentTime)
 -- TEST
 import qualified CryptoDepth.Db.Query                       as Test
 import qualified Data.Aeson                                 as Json
-import Data.List                                            (sort, sortOn)
+import Data.List                                            (sort, sortOn, sortBy)
 
 
 main :: IO ()
@@ -116,21 +116,27 @@ testSumSelect allPathsInfos conn =
     Beam.withDatabase conn Test.testNewestPathSumsSelect
         >>= assertEquals
   where
-    assertEquals
-        :: Map.HashMap
-                Test.Sym
-                ( Test.SlippageQty TestSlippage TestNumeraire
-                , Test.SlippageQty TestSlippage TestNumeraire
-                )
+    assertEquals ::
+        [( CD.Sym
+         , ( Test.SlippageQty TestSlippage TestNumeraire
+           , Test.SlippageQty TestSlippage TestNumeraire
+           )
+         )
+        ]
         -> IO ()
     assertEquals input =
-        mkResultMap input
+        input
         `shouldBe`
-        mkResultMap (fmap pathTotals allPathsInfos)
+        (sortBy bySumSym . Map.toList $ fmap pathTotals allPathsInfos)
     pathTotals (buyL, sellL) =
         ( sum $ map CD.piQty buyL
         , sum $ map CD.piQty sellL
         )
+    bySumSym (sym1, (buyQty1, sellQty1)) (sym2, (buyQty2, sellQty2)) =
+        let bySum = (buyQty2+sellQty2) `compare` (buyQty1+sellQty1)
+        in if bySum == EQ
+            then sym1 `compare` sym2
+            else bySum
 
 newtype ResultMap currency = ResultMap
     (Map.HashMap Test.Sym (CD.Amount currency, CD.Amount currency))
