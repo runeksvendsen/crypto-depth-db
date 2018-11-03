@@ -113,9 +113,12 @@ testSumSelect
     -> Postgres.Connection
     -> Expectation
 testSumSelect allPathsInfos conn =
-    Beam.withDatabase conn Test.testNewestPathSumsSelect
+    Beam.withDatabase conn (run $ Beam.select Test.newestBuySellPathSums)
         >>= assertEquals
   where
+    run :: Beam.FromBackendRow Postgres.Postgres a
+        => Beam.SqlSelect Postgres.PgSelectSyntax a -> Postgres.Pg [a]
+    run = Beam.runSelectReturningList
     assertEquals ::
         [( CD.Sym
          , ( Test.SlippageQty TestSlippage TestNumeraire

@@ -1,7 +1,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 module CryptoDepth.Db.Internal.Query.PathSums
-( testNewestPathSumsSelect
+( newestBuySellPathSums
 , PathTable
 , SlippageQty
 , CD.Sym
@@ -22,8 +22,7 @@ import qualified Money
 import qualified Data.HashMap.Strict    as Map
 
 import Database.Beam
-import Database.Beam.Query.Internal         (QNested)
-import Database.Beam.Query                  (QueryInaccessible)
+import Database.Beam.Query.Internal         (QNested, WithRewrittenThread)
 import Database.Beam.Postgres
 import Database.Beam.Postgres.Syntax        (PgExpressionSyntax)
 
@@ -40,37 +39,20 @@ type PathSumQuery s numeraire slippage =
         )
 
 
-testNewestPathSumsSelect
-    ::
-    ( KnownSymbol numeraire
-    , PathTable numeraire Postgres
-    , PathQuantity slippage numeraire
-        (QExpr PgExpressionSyntax (QNested (QNested QueryInaccessible)))
-    )
-    => Pg
-        [( CD.Sym
-         , ( SlippageQty slippage numeraire
-           , SlippageQty slippage numeraire
-           )
-         )
-        ]
-testNewestPathSumsSelect =
-    runSelectReturningList newestPathSumsSelect
-
-newestPathSumsSelect
-    ::
-    ( KnownSymbol numeraire
-    , PathTable numeraire Postgres
-    , PathQuantity slippage numeraire
-        (QExpr PgExpressionSyntax (QNested (QNested QueryInaccessible)))
-    )
-    => SqlSelect PgSelectSyntax
-        ( Text
-        , ( SlippageQty slippage numeraire
-          , SlippageQty slippage numeraire
-          )
+newestBuySellPathSums
+    :: ( KnownSymbol numeraire
+       , PathTable numeraire Postgres
+       , PathQuantity slippage numeraire (QExpr PgExpressionSyntax (QNested (QNested s)))
+       )
+    => Q PgSelectSyntax CryptoDepthDb s
+        ( WithRewrittenThread (QNested s) s
+            ( QExpr PgExpressionSyntax (QNested s) Text
+            , ( QExpr PgExpressionSyntax (QNested s) (SlippageQty slippage numeraire)
+              , QExpr PgExpressionSyntax (QNested s) (SlippageQty slippage numeraire)
+              )
+            )
         )
-newestPathSumsSelect = select $
+newestBuySellPathSums =
     orderBy_ buySellQtySumSym $ do
         (buySym, buyQty)   <- newestBuyPathSums
         (sellSym, sellQty) <- newestSellPathSums
