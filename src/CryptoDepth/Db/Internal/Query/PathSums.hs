@@ -2,6 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 module CryptoDepth.Db.Internal.Query.PathSums
 ( newestBuySellPathSums
+, newestBuySellPathSumsPaginate
 , PathTable
 , SlippageQty
 , CD.Sym
@@ -38,6 +39,27 @@ type PathSumQuery s numeraire slippage =
         , QExpr PgExpressionSyntax s (SlippageQty slippage numeraire)
         )
 
+
+-- | 'newestBuySellPathSums' with offset and limit.
+--
+newestBuySellPathSumsPaginate
+    :: ( KnownSymbol numeraire
+       , PathTable numeraire Postgres
+       , PathQuantity slippage numeraire
+            (QExpr PgExpressionSyntax (QNested (QNested (QNested (QNested QueryInaccessible)))))
+       )
+    => Integer  -- ^ Offset
+    -> Integer  -- ^ Limit
+    -> Pg [( Text
+           , ( Tagged slippage (Amount numeraire)
+             , Tagged slippage (Amount numeraire)
+             )
+           )
+          ]
+newestBuySellPathSumsPaginate offset limit =
+    runSelectReturningList $ select
+        $ offset_ offset
+        $ limit_ limit newestBuySellPathSums
 
 newestBuySellPathSums
     :: ( KnownSymbol numeraire
