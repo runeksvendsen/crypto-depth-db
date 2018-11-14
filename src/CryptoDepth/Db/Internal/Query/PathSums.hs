@@ -6,6 +6,7 @@ module CryptoDepth.Db.Internal.Query.PathSums
 , PathTable
 , SlippageQty
 , CD.Sym
+, CD.Amount
 , CD.OneDiv
 , KnownSymbol
 )
