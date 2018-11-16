@@ -5,6 +5,7 @@ module CryptoDepth.Db.Internal.Query.Paths
 , PathTable
 , CD.Sym
 , CD.OneDiv
+, CD.PathInfo(..)
 , KnownSymbol
 )
 where
