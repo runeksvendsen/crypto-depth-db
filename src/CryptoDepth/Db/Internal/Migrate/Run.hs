@@ -1,17 +1,19 @@
 module CryptoDepth.Db.Internal.Migrate.Run
 ( createTables
 , dropTables
+, assertTables
 )
 where
 
 import           CryptoDepth.Db.Internal.Prelude
 import qualified CryptoDepth.Db.Internal.Migrate.Schema as Schema
 import qualified Data.ByteString.Lazy.Char8             as BSL
-import           Control.Monad                          (void)
+import           Control.Monad                          (void, when)
 import           Control.Monad.IO.Class                 (liftIO)
 import           Control.Exception                      (catch)
 
 import           Database.Beam.Migrate.Simple
+import           Database.Beam.Migrate.Types            (collectChecks)
 import qualified Database.Beam.Postgres                 as Pg
 import qualified Database.Beam.Postgres.Migrate         as Pg
 import qualified Database.Beam.Postgres.Syntax          as Pg
@@ -21,6 +23,20 @@ import qualified Database.PostgreSQL.Simple.Types       as PgSimple
 
 createTables :: Pg.Connection -> IO (CheckedDatabaseSettings Pg.Postgres Schema.CryptoDepthDb)
 createTables conn = runMigration conn Schema.dbCreate
+
+-- | Assert that the database has been migrated to the current schema
+assertTables :: Pg.Connection -> IO ()
+assertTables conn = do
+    actualDbState   <- Pg.getDbConstraints conn
+    expectedDbState <- collectChecks <$> mkCheckedDb Schema.dbCreate
+    when (actualDbState /= expectedDbState) $
+        error $ unlines
+            [ "Unsupported DB schema found:"
+            , show actualDbState
+            ]
+  where
+    mkCheckedDb migration =
+        runMigrationSteps 0 Nothing migration (\_ _ step -> pure (runMigrationSilenced step))
 
 dropTables
   :: Pg.Connection
