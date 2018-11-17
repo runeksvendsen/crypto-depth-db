@@ -1,4 +1,4 @@
 { "description" : "postgres-9.6 docker instance"
 , "db_url"      : "host=localhost port=5432 sslmode=disable user=test password=test dbname=test connect_timeout=10"
-, "cmd"         : "docker run -d postgres:9.6 --name postgres-test -p 5432:5432 -e POSTGRES_PASSWORD=test -e POSTGRES_USER=test -e POSTGRES_DB=test"
+, "cmd"         : "docker run -p 5432:5432 --name postgres-test -e POSTGRES_PASSWORD=test -e POSTGRES_USER=test -e POSTGRES_DB=test -d postgres:9.6"
 }
