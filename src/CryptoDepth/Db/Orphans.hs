@@ -5,23 +5,19 @@ module CryptoDepth.Db.Orphans where
 
 import CryptoDepth.Db.Internal.Prelude
 
-import Database.Beam.Backend.SQL.SQL92  (HasSqlValueSyntax(..), autoSqlValueSyntax)
-import CryptoDepth.Types                (SymVenue, Amount)
-import OrderBook.Types                  (SomeOrder)
-import Data.List.NonEmpty               (NonEmpty)
-import qualified Money
-import qualified Data.Aeson             as Json
-import Database.Beam.Backend
-import Database.Beam.Postgres
-import Database.Beam.Postgres.Syntax    (PgValueSyntax)
+import           Database.Beam.Backend.SQL.SQL92  (HasSqlValueSyntax(..), autoSqlValueSyntax)
+import           CryptoDepth.Types                (SymVenue, Amount)
+import           OrderBook.Types                  (SomeOrder)
+import           Data.List.NonEmpty               (NonEmpty)
+import qualified Data.Aeson                       as Json
+import           Database.Beam.Backend
+import           Database.Beam.Postgres
 import           Database.PostgreSQL.Simple.FromField
 import           Database.PostgreSQL.Simple.ToField
 import           Text.Read
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString                  as BS
+import           Data.Typeable
 
-import Data.Typeable
-import Debug.Trace
 
 -- Encode
 instance HasSqlValueSyntax be String => HasSqlValueSyntax be (NonEmpty SymVenue) where
@@ -39,9 +35,6 @@ instance HasSqlValueSyntax be BS.ByteString => HasSqlValueSyntax be SomeOrder wh
 
 instance ToField SomeOrder where
   toField = toField @BS.ByteString . toS . Json.encode
-
--- instance HasSqlValueSyntax be BS.ByteString => HasSqlValueSyntax be (Vector SomeOrder) where
---   sqlValueSyntax = (sqlValueSyntax :: BS.ByteString -> be) . toS . Json.encode
 
 
 -- Decode
@@ -63,7 +56,7 @@ instance FromBackendRow Postgres (NonEmpty SymVenue)
 instance KnownSymbol currency => FromField (Amount currency) where
   fromField f bsM =
     -- TODO: Change when resolved: https://github.com/tathougies/beam/issues/324
-    fromIntegral . round @Double <$> fromField f bsM
+    fromIntegral @Word64 . round @Double <$> fromField f bsM
 instance KnownSymbol currency => FromBackendRow Postgres (Amount currency)
 
 instance FromField SomeOrder where
