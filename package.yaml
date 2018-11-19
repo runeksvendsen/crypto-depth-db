@@ -86,3 +86,4 @@ tests:
     - crypto-depth-db
     - hashable          # Orphans
     - hspec
+    - directory

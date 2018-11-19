@@ -37,7 +37,7 @@ import Data.Text                        (Text)
 import Data.Vector                      (Vector)
 import Data.Proxy                       (Proxy(..))
 import Text.Printf                      (printf)
-import Control.Monad as Monad           ((<=<), (>=>))
+import Control.Monad as Monad           ((<=<), (>=>), forM, forM_)
 import qualified System.IO              as IO
 import Database.Beam.Schema.Tables      (Columnar, Columnar'(..))
 import Debug.Trace                      (trace)

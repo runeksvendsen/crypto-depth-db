@@ -29,14 +29,33 @@ import           Data.Time.Clock                            (getCurrentTime)
 -- TEST
 import qualified CryptoDepth.Db.Query                       as Test
 import qualified Data.Aeson                                 as Json
-import Data.List                                            (sort, sortOn, sortBy)
+import Data.List                                            (sort, sortOn, sortBy, groupBy)
+import System.Directory                                     (listDirectory)
 
 
 main :: IO ()
 main = do
-    books <- either error return =<<
-        Json.eitherDecodeFileStrict "test/data/test.json"
-    withPreparedDb (\conn -> mainStore conn books >> hspecMain books conn)
+    booksList <- mapM decodeFileOrFail =<< getTestFiles
+    withPreparedDb $ \conn -> do
+        forM_ booksList $ \(books, file) -> do
+            _ <- mainStore conn books
+            hspecMain file books conn
+  where
+    throwError file str = error $ file ++ ": " ++ str
+    decodeFileOrFail file = do
+        books <- either (throwError file) return =<< Json.eitherDecodeFileStrict file
+        return (books, file)
+
+getTestFiles :: IO [FilePath]
+getTestFiles = do
+    jsonFiles <- filter jsonExtension <$> listDirectory testDataDir
+    return $ map (testDataDir ++) jsonFiles
+  where
+    testDataDir = "test/data/"
+    jsonExtension fileName = let splitByDot = T.split (== '.') (toS fileName) in
+        if null splitByDot
+            then False
+            else last splitByDot == "json"
 
 withPreparedDb :: (Postgres.Connection -> IO a) -> IO a
 withPreparedDb f =
@@ -67,14 +86,15 @@ openConn = do
         return dbUrl
 
 hspecMain
-    :: [CD.ABook]
+    :: String
+    -> [CD.ABook]
     -> Postgres.Connection
     -> IO ()
-hspecMain books conn = hspec $ do
-    describe "newest path sums" $ do
+hspecMain fileName books conn = hspec $ do
+    describe ("newest path sums (" ++ fileName ++ ")") $ do
         it "returns correct sums for 5% slippage" $
             testSumSelect allPathsInfos conn
-    describe "newest paths" $
+    describe ("newest paths (" ++ fileName ++ ")") $
         mapM_ (testPathSelect' conn) (Map.toList allPathsInfos)
   where
     testPathSelect' conn (sym, pathInfos) =
