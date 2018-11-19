@@ -31,6 +31,7 @@ main = do
     books <- throwErrM $ withLogging $ AppM.runAppM man maxRetries $
         Fetch.allBooks (Proxy :: Proxy Numeraire) numObLimit
     Json.encodeFile targetFile books
+    putStrLn $ "Wrote " ++ show targetFile
 
 withLogging :: IO a -> IO a
 withLogging ioa = Log.withStderrLogging $ do
