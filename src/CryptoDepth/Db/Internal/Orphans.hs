@@ -1,24 +1,20 @@
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module CryptoDepth.Db.Internal.Orphans where
 
-import           Data.Proxy                     (Proxy(..))
-
-import qualified CryptoDepth
-import qualified CryptoDepth.Fetch              as Fetch
+import qualified CryptoVenues.Venues            ()
+import           CryptoVenues.Fetch.MarketBook  (MarketBook)
 import qualified OrderBook.Types                as OB
-
-import           CryptoVenues.Types.Market
-import           CryptoVenues.Fetch.MarketBook
-
-import qualified Data.Aeson                     as Json
-import           Data.Aeson                     ((.=), (.:))
+import qualified CryptoDepth
 
 import qualified Money
--- TODO: move
-import GHC.TypeLits                             (KnownSymbol, SomeSymbol(..)
-                                                , symbolVal, someSymbolVal, sameSymbol
+import qualified Data.Aeson                     as Json
+import           Data.Aeson                     ((.=), (.:))
+import           Data.Proxy                     (Proxy(..))
+import           GHC.TypeLits                   (KnownSymbol, SomeSymbol(..)
+                                                , symbolVal, someSymbolVal
                                                 )
-import Data.Type.Equality                       ((:~:)(Refl))
-import Data.Maybe                               (fromMaybe)
+import           Data.Maybe                     (fromMaybe)
 
 
 -- TODO: Move below to "orderbook" library
@@ -55,7 +51,7 @@ instance Json.FromJSON CryptoDepth.ABook where
         case someSymbolVal base of
             SomeSymbol (Proxy :: Proxy base) -> case someSymbolVal quote of
                 SomeSymbol (Proxy :: Proxy quote) -> do
-                    case marketBookVenue (someSymbolVal venue) of
+                    case marketBookVenue venue of
                         Nothing -> fail $ "Unknown venue: " ++ venue
                         Just (MarketBookVenue (Proxy :: Proxy venue)) -> do
                             buySide  <- obj .: "bids"
@@ -85,14 +81,10 @@ data MarketBookVenue =
     forall venue. MarketBook venue
     => MarketBookVenue (Proxy venue)
 
-marketBookVenue :: SomeSymbol -> Maybe MarketBookVenue
-marketBookVenue (SomeSymbol p) =
-    case sameSymbol p (Proxy :: Proxy "bitfinex") of
-        Just Refl -> Just (MarketBookVenue p)
-        Nothing   -> case sameSymbol p (Proxy :: Proxy "bittrex") of
-            Just Refl -> Just (MarketBookVenue p)
-            Nothing   -> case sameSymbol p (Proxy :: Proxy "binance") of
-                Just Refl -> Just (MarketBookVenue p)
-                Nothing   -> case sameSymbol p (Proxy :: Proxy "bitstamp") of
-                    Just Refl -> Just (MarketBookVenue p)
-                    Nothing   -> Nothing
+marketBookVenue :: String -> Maybe MarketBookVenue
+marketBookVenue "bitfinex" = Just . MarketBookVenue $ Proxy @"bitfinex"
+marketBookVenue "bittrex"  = Just . MarketBookVenue $ Proxy @"bittrex"
+marketBookVenue "binance"  = Just . MarketBookVenue $ Proxy @"binance"
+marketBookVenue "bitstamp" = Just . MarketBookVenue $ Proxy @"bitstamp"
+marketBookVenue "coinbase" = Just . MarketBookVenue $ Proxy @"coinbase"
+marketBookVenue _          = Nothing
