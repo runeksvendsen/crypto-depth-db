@@ -11,7 +11,7 @@ packages:
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/crypto-depth.git
-    commit: 3cb03d051423dc720c8a8522ef5019e80fac8e04
+    commit: 34173e72f8b2db0f83c207da5ae6f6c1f69a24f9
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/crypto-venues.git
