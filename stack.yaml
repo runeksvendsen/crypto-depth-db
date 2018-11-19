@@ -15,7 +15,7 @@ packages:
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/crypto-venues.git
-    commit: fbc1f7b040f5a318b808e6c847a1944541d8da51
+    commit: 84043b03ba0292d19477f1f765ac91e812edc056
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/orderbook.git
