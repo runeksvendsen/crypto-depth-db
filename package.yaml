@@ -39,6 +39,7 @@ dependencies:
 - bytestring
 - scientific
 - directory     # CryptoDepth.Db.Test
+- file-embed    # CryptoDepth.Db.Test
 
 default-extensions:
 - DeriveGeneric

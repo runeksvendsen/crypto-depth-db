@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 module CryptoDepth.Db.Test.Prepare
 ( runWithDb
 , openConn
@@ -15,10 +16,12 @@ import qualified Database.Beam                              as Beam
 import qualified Database.Beam.Postgres                     as Postgres
 import qualified Data.Text                                  as T
 import qualified Data.Aeson                                 as Json
+import qualified Data.ByteString.Lazy                       as BL
 
 import           Control.Exception                          (bracket)
 import           Data.Time.Clock                            (getCurrentTime)
 import           System.Directory                           (listDirectory)
+import           Data.FileEmbed                             (embedStringFile, makeRelativeToProject)
 
 
 -- |
@@ -40,6 +43,12 @@ runWithDb afterSingleStore afterAllStore = do
     decodeFileOrFail file = do
         books <- either (throwError file) return =<< Json.eitherDecodeFileStrict file
         return (books, file)
+
+testJsonData :: [BL.ByteString]
+testJsonData =
+    [ $(makeRelativeToProject "test/data/test.json.zip" >>= embedStringFile)
+    , $(makeRelativeToProject "test/data/test2.json.zip" >>= embedStringFile)
+    ]
 
 getTestFiles :: IO [FilePath]
 getTestFiles = do
