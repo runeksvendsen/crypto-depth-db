@@ -14,52 +14,56 @@ import qualified CryptoDepth                                as CD
 import qualified Data.HashMap.Strict                        as Map
 import qualified Database.Beam                              as Beam
 import qualified Database.Beam.Postgres                     as Postgres
-import qualified Data.Text                                  as T
 import qualified Data.Aeson                                 as Json
 import qualified Data.ByteString.Lazy                       as BL
+import qualified Data.ByteString                            as BS
+import qualified Codec.Archive.Zip                          as Zip
 
 import           Control.Exception                          (bracket)
 import           Data.Time.Clock                            (getCurrentTime)
-import           System.Directory                           (listDirectory)
-import           Data.FileEmbed                             (embedStringFile, makeRelativeToProject)
+import           Data.FileEmbed                             (embedFile, makeRelativeToProject)
 
 
 -- |
 runWithDb
     :: -- | Action to perform each time after storing a list of 'CD.ABook'
-       (String -> [CD.ABook] -> Postgres.Connection -> IO ())
+       (FilePath -> [CD.ABook] -> Postgres.Connection -> IO ())
        -- | Action to perform after all 'CD.ABook's have been stored
-    -> ([([CD.ABook], String)] -> Postgres.Connection -> IO a)
+    -> ([(FilePath, [CD.ABook])] -> Postgres.Connection -> IO a)
     -> IO a
 runWithDb afterSingleStore afterAllStore = do
-    booksList <- mapM decodeFileOrFail =<< getTestFiles
+    let booksList = either error id $ fileBooksE
     withPreparedDb $ \conn -> do
-        forM_ booksList $ \(books, file) -> do
+        forM_ booksList $ \(file, books) -> do
             _ <- mainStore conn books
             afterSingleStore file books conn
         afterAllStore booksList conn
   where
-    throwError file str = error $ file ++ ": " ++ str
-    decodeFileOrFail file = do
-        books <- either (throwError file) return =<< Json.eitherDecodeFileStrict file
-        return (books, file)
+    fileBooksE :: Either String [(FilePath, [CD.ABook])]
+    fileBooksE = fileDataE >>= traverse jsonDecode
+    fileDataE :: Either String [(FilePath, BL.ByteString)]
+    fileDataE = fileAndData <$> decodeZip zipData
+    mkErrorStr fileName str = fileName ++ ": " ++ show str
+    jsonDecode :: Json.FromJSON a
+               => (FilePath, BL.ByteString)
+               -> Either String (FilePath, a)
+    jsonDecode tuple@(fileName, _) =
+        fmapL (mkErrorStr fileName) $ traverse Json.eitherDecode tuple
 
-testJsonData :: [BL.ByteString]
-testJsonData =
-    [ $(makeRelativeToProject "test/data/test.json.zip" >>= embedStringFile)
-    , $(makeRelativeToProject "test/data/test2.json.zip" >>= embedStringFile)
-    ]
-
-getTestFiles :: IO [FilePath]
-getTestFiles = do
-    jsonFiles <- filter jsonExtension <$> listDirectory testDataDir
-    return $ map (testDataDir ++) jsonFiles
+fileAndData :: Zip.Archive -> [(FilePath, BL.ByteString)]
+fileAndData =
+    map entryFileData . Zip.zEntries
   where
-    testDataDir = "test/data/"
-    jsonExtension fileName = let splitByDot = T.split (== '.') (toS fileName) in
-        if null splitByDot
-            then False
-            else last splitByDot == "json"
+    entryFileData entry =
+        (Zip.eRelativePath entry, Zip.fromEntry entry)
+
+decodeZip :: BS.ByteString -> Either String Zip.Archive
+decodeZip =
+    Zip.toArchiveOrFail . toS
+
+zipData :: BS.ByteString
+zipData =
+    $(makeRelativeToProject "test/data/json.zip" >>= embedFile)
 
 withPreparedDb :: (Postgres.Connection -> IO a) -> IO a
 withPreparedDb f =

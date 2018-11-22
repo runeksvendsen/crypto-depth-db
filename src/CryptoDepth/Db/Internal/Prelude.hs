@@ -18,6 +18,7 @@ module CryptoDepth.Db.Internal.Prelude
 , putStrLnErr
 , fromC'
 , trace
+, fmapL
 )
 where
 
@@ -43,6 +44,9 @@ import Database.Beam.Schema.Tables      (Columnar, Columnar'(..))
 import Debug.Trace                      (trace)
 import Control.Monad.IO.Class           (MonadIO, liftIO)
 
+fmapL :: (a -> c) -> Either a b -> Either c b
+fmapL f (Left a)  = Left (f a)
+fmapL _ (Right b) = Right b
 
 putStrLnErr :: String -> IO ()
 putStrLnErr = IO.hPutStrLn IO.stderr

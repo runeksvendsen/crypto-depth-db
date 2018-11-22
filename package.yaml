@@ -38,7 +38,7 @@ dependencies:
 - aeson
 - bytestring
 - scientific
-- directory     # CryptoDepth.Db.Test
+- zip-archive   # CryptoDepth.Db.Test
 - file-embed    # CryptoDepth.Db.Test
 
 default-extensions:
