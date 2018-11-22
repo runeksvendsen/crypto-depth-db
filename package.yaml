@@ -38,8 +38,6 @@ dependencies:
 - aeson
 - bytestring
 - scientific
-- zip-archive   # CryptoDepth.Db.Test
-- file-embed    # CryptoDepth.Db.Test
 
 default-extensions:
 - DeriveGeneric
