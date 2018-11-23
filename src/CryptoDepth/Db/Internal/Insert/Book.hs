@@ -6,6 +6,7 @@ where
 import CryptoDepth.Db.Internal.Prelude
 import qualified CryptoDepth.Db         as Db
 import CryptoDepth.Db.Internal.Table.Book        (Book, BookT(..), RunId)
+import CryptoDepth.Db.Orphans                    ()
 import qualified CryptoDepth            as CD
 import qualified Database.Beam          as Beam
 import Database.Beam.Postgres           (Pg)

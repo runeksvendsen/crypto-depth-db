@@ -19,6 +19,7 @@ import CryptoDepth.Db
 import CryptoDepth.Db.Internal.Table.Run
 import CryptoDepth.Db.Internal.Table.Path
 import CryptoDepth.Db.Internal.Table.RunSymbol
+import CryptoDepth.Db.Orphans                   ()
 import qualified CryptoDepth as CD
 import qualified Money
 import qualified Data.HashMap.Strict    as Map

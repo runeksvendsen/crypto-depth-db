@@ -15,7 +15,6 @@ where
 
 import CryptoDepth.Db.Internal.Prelude
 import CryptoDepth.Db.Internal.Table.Run         (RunT, Run, RunId)
-import CryptoDepth.Db.Orphans           ()
 import CryptoDepth                      (Sym, OneDiv, Amount)
 
 import Database.Beam
