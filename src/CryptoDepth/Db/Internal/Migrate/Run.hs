@@ -31,8 +31,11 @@ assertTables conn = do
     expectedDbState <- collectChecks <$> mkCheckedDb Schema.dbCreate
     when (actualDbState /= expectedDbState) $
         error $ unlines
-            [ "Unsupported DB schema found:"
+            [ "Unsupported DB schema."
+            , "Found:"
             , show actualDbState
+            , "Expected:"
+            , show expectedDbState
             ]
   where
     mkCheckedDb migration =
