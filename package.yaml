@@ -83,6 +83,8 @@ tests:
     - -Wall
     - -fno-warn-name-shadowing
     dependencies:
-    - crypto-depth-db
+    - protolude
+    - crypto-depth-db-test
     - hashable          # Orphans
     - hspec
+    - tagged

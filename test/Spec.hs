@@ -1,9 +1,7 @@
 module Main where
 
-import qualified CryptoDepth.Db.Test.Prepare                as Prepare
-import qualified CryptoDepth.Db.Query                       as Test
-import           CryptoDepth.Db.Internal.Prelude
-import           CryptoDepth.Db.Internal.Util               (liquidPathsMap)
+import qualified CryptoDepth.Db.Test.Prepare                as Test
+
 import           Orphans                                    ()
 import qualified CryptoDepth                                as CD
 
@@ -13,11 +11,14 @@ import qualified Database.Beam                              as Beam
 import qualified Database.Beam.Postgres                     as Postgres
 import           Test.Hspec
 import           Data.List                                  (sort, sortOn, sortBy)
+import           GHC.TypeLits                               (KnownSymbol)
+import           Data.Tagged                                (Tagged(unTagged))
+import           Protolude                                  (toS)
 
 
 main :: IO ()
 main =
-    Prepare.runWithDb
+    Test.runWithDb
         hspecMain
         mempty
 
@@ -36,7 +37,7 @@ hspecMain fileName books conn = hspec $ do
     testPathSelect' conn (sym, pathInfos) =
         it ("returns correct PathInfos for " ++ toS sym) $
             testPathSelect conn sym pathInfos
-    allPathsInfos = CD.allPathsInfos . liquidPathsMap $ books
+    allPathsInfos = CD.allPathsInfos . Test.liquidPathsMap $ books
 
 type TestSlippage = Test.OneDiv 20
 type TestNumeraire = "USD"

@@ -10,6 +10,10 @@ packages:
       - beam-postgres
   extra-dep: true
 - location:
+    git: https://github.com/runeksvendsen/crypto-depth-db-test.git
+    commit: 805b13cd83e5894b4203393c95cac7073619f95f
+  extra-dep: true
+- location:
     git: https://github.com/runeksvendsen/crypto-depth.git
     commit: 1e72a2d25f0e4e1f9c24a18957cc69b3ccfa10e9
   extra-dep: true
