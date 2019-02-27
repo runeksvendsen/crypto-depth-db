@@ -15,15 +15,15 @@ packages:
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/crypto-depth.git
-    commit: 1e72a2d25f0e4e1f9c24a18957cc69b3ccfa10e9
+    commit: fb47195fa75c7e679812835a4741357b8e209612
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/crypto-venues.git
-    commit: 84043b03ba0292d19477f1f765ac91e812edc056
+    commit: 7c9a28642fbd6a770616617b29c0a50c58088303
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/orderbook.git
-    commit: a8b3cad89036c1613618792943bc6261c02eb4fe
+    commit: 1cfe64aeb59ddebcfb0b8353f82457d16766fa36
   extra-dep: true
 
 extra-deps:
