@@ -68,12 +68,11 @@ executables:
     - -Wall
     - -fno-warn-name-shadowing
     dependencies:
-    - crypto-depth
-    - crypto-depth-db # TMP
     - http-client
     - http-client-tls
     - logging
     - optparse-applicative
+    - errors
 
 tests:
   crypto-depth-db-test:
