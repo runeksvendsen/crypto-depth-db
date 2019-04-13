@@ -60,20 +60,6 @@ library:
   - -Wall
   - -fno-warn-name-shadowing
 
-executables:
-  write-test-data:
-    main:                WriteTestData.hs
-    source-dirs:         test/util
-    ghc-options:
-    - -Wall
-    - -fno-warn-name-shadowing
-    dependencies:
-    - http-client
-    - http-client-tls
-    - logging
-    - optparse-applicative
-    - errors
-
 tests:
   crypto-depth-db-test:
     main:                Spec.hs
